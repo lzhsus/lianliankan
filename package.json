@@ -12,7 +12,7 @@
     "babel-runtime": "^6.26.0",
     "cropper": "^3.1.4",
     "iphone-inline-video": "^2.2.2",
-    "jquery": "^2.2.4",
+    "jquery": "^3.4.1",
     "jsonp": "^0.2.1",
     "mint-ui": "^2.2.13",
     "vconsole": "^3.1.0",
