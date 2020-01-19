@@ -2,7 +2,11 @@
 	<div class="index-wrapper" id="index">
 		<!-- 动画 -->
 		<canvas id='demoCanvas' width="750" height="1450"></canvas>
-		<div class="start" @click="startBtn">开始</div>
+		<div class="start" >
+			<div @click="startBtn">开始</div>
+			<div @click="contentBtn">CONTENT+{{CONTENT}}</div>
+		</div>
+
 	</div>
 </template>
 
@@ -11,7 +15,11 @@
 	import Api from "api/index";
 	// 公共方法
 	import query from "vendor/utils/getUrlParms"
-	var stage,container,circle,y_num=0,container2,containerBg,containerLine,interval=10,verifyResult=0;
+	// import { start,drew,drewBorder,randomOrder,drawLine,dataFastList,dataListFunc,contentAdd } from "../../flash/dataconfig.js"
+	
+	import dC from "../../flash/dataconfig.js"
+	var stage,container,circle,y_num=0,container2,container3,containerBg,containerLine,interval=10,verifyResult=0;
+	// var numL=4,rectLongJS=30;
 	export default {
 		name: "app",
 		data() {
@@ -23,16 +31,29 @@
 				numL:4,
 				rectLong:30,
 				resr:['',''],
-				startObj:[{},{}]
+				containerList:[{},{}],
+				startObj:[{},{}],
+				childrens:[],
+				newUpD:[],
+				CONTENT:0,
+
 			}
 		},
 		components: {},
 		computed: { },
 		watch: {},
 		methods: {
+			contentBtn(){
+				this.CONTENT=!this.CONTENT
+			},
 			// 生成初始数据
 			async startBtn(){
-				var dataList=[]
+				// var list =await dC.start(this.newUpD,this.containerList);
+				// list.forEach((element,i) => {
+				//     this.drew(element)
+				// });
+				// return; 
+				var dataList=[];
 				dataList = this.dataListFunc(this.numL)
 				// 
 				this.dataFastList(dataList[0],dataList[dataList.length-1])
@@ -53,27 +74,11 @@
 				// var oldData = dataList
 				var newDataList = this.randomOrder(values);
 				weizhi.map((obj,i)=>{
+					obj.index = i
 					obj.id=newDataList[i].id
 					obj.type=newDataList[i].type
 					obj.value=newDataList[i].value
 				})
-				// // newDataList.map((element,i) => {
-				// // 	element.x =this.dataList[i].x
-				// // 	element.y =this.dataList[i].y
-				// // 	element.x_h =this.dataList[i].x_h
-				// // 	element.x_w =this.dataList[i].x_w
-				// // });
-				// var newData = [];
-				// console.log(newDataList)
-				// dataList.forEach((obj,i) => {
-				// 	obj.id =newDataList[i].id
-				// 	obj.type=newDataList[i].type
-				// 	obj.value=newDataList[i].value
-				// 	newData.push(obj)
-				// 	// return obj
-				// })
-				// console.log(newData)
-				// return
 				weizhi.forEach((element,i) => {
 					// if(i<1){
 
@@ -92,33 +97,53 @@
 			
 				rect.graphics.beginFill("#b8ccf3").drawRect(_sX, _sY, rectX, rectY);
 				rect.shadow = new createjs.Shadow("red", 0, 0, 0);
-
+				rect.obj = ele
 				var text = new createjs.Text(ele.type,"12px Arial","blue");
 				 
 				text.x = _sX + rectX/3
 				text.y = _sY + rectY/3
 				this.contentAdd(rect)
-				container.addChild(rect,text);
-				stage.update();
+				container.addChild(rect);
+				container3.addChild(text)
+				stage.update(text);
 			},
 			drawLine(start,cd){
-				var startDatas =this.startObj
-				var f_sX = startDatas[0].x+startDatas[0].x_w*interval+this.rectLong/2 ,f_sY = startDatas[0].y+startDatas[0].x_h*interval+this.rectLong/2;//坐标
-				var e_sX = startDatas[1].x+startDatas[1].x_w*interval+this.rectLong/2 ,e_sY = startDatas[1].y+startDatas[1].x_h*interval+this.rectLong/2;//坐标
+				
+				var _s = this.containerList;
+
+				var f_sX = _s[0].obj.x + _s[0].obj.x_w*interval+this.rectLong/2 ,
+					f_sY = _s[0].obj.y + _s[0].obj.x_h*interval+this.rectLong/2;//坐标
+				var e_sX = _s[1].obj.x + _s[1].obj.x_w*interval+this.rectLong/2 ,
+					e_sY = _s[1].obj.y + _s[1].obj.x_h*interval+this.rectLong/2;//坐标
 
 				// 直线
-				console.log(start)
 				if(start == 'straight-line'){
 					let g = new createjs.Graphics();
 					/* 同一个 Graphics 实例， 可以多次绘制，以下线段、折线都是用 g 实例绘制的*/
-					g.setStrokeStyle(2).beginStroke("red").moveTo(f_sX,f_sY).lineTo(e_sX,e_sY)
+					if(this.newUpD.length==1){
+						var x = this.newUpD[0].x;
+						var y = this.newUpD[0].y;
+						g.setStrokeStyle(2).beginStroke("#000").moveTo(f_sX,f_sY).lineTo(x,y).lineTo(e_sX,e_sY)
+					}else if(this.newUpD.length == 2){
+						var x = this.newUpD[0].x + this.newUpD[0].x_w*interval+this.rectLong/2;
+						var y = this.newUpD[0].y + this.newUpD[0].x_h*interval+this.rectLong/2;
+						
+						var x2 = this.newUpD[1].x + this.newUpD[1].x_w*interval+this.rectLong/2;
+						var y2 = this.newUpD[1].y + this.newUpD[1].x_h*interval+this.rectLong/2;
+						console.log(f_sX,f_sY)
+						console.log(x,y)
+						console.log(x2,y2)
+						console.log(e_sX,e_sY)
+						g.setStrokeStyle(2).beginStroke("#000").moveTo(f_sX,f_sY).lineTo(x,y).lineTo(x2,y2).lineTo(e_sX,e_sY)
+					}else{
+						g.setStrokeStyle(2).beginStroke("#000").moveTo(f_sX,f_sY).lineTo(e_sX,e_sY)
+					}
 					// 简写形式
 					// g.ss(20).s('#fafa35').mt(400,100).lt(400,260)
 					// // 多点折线的简写形式
-					// g.ss(1).s('#000').mt(600,400).lt(600, 200).lt(400,300).lt(500, 550)
-					console.log('直线')
-					var line = new createjs.Shape(g)
 
+					// g.ss(1).s('#000').mt(600,400).lt(600, 200).lt(400,300).lt(500, 550)
+					var line = new createjs.Shape(g)
 				}
 				containerLine.addChild(line);
 				stage.update()
@@ -134,6 +159,7 @@
 				rect1.mask = rect
 				// rect1.alpha=0
 				container2.addChild(rect,rect1);
+				
 				stage.update();
 			},
 			// 取数据的第一个 左后一个
@@ -162,8 +188,10 @@
 					
 					var obj={ 
 						id:i+1,
+						index:i,
 						value:i+1,
 						type:_num,
+						del:0,
 						x_w:(i+1)%this.numL?(i+1)%this.numL:this.numL,
 						x_h:x_h,
 						x:x*x_n+12,
@@ -178,6 +206,7 @@
 					}else{
 						x_n++
 					}
+					var isBol = parseInt(Math.random()*2)
 					datas.forEach(element => {
 						if(element.type == _num){
 							_num++
@@ -214,25 +243,12 @@
 			contentAdd(_self){
 				_self.addEventListener('click',()=>{
 					if(verifyResult) return
-					var index='',obj={};
-					var dIndex=''
-					var nC=[]
-					container.children.forEach(e=>{
-						if(!e.text){
-							nC.push(e)
-						}
-					})
-					nC.forEach((element,i) => {
-						if(element.id==_self.id){
-							dIndex = i
-						}
-					});
 					// 判断点击的是否同一个 
 					var isXiangtong = 0;
-
+					var containerIndex = ''
 					container.children.forEach((element,i) => {
-						if(element.id==_self.id){
-							index = element.id;
+						if(element.id ==_self.id){
+							containerIndex = i;
 							if(element.shadow.blur){
 								isXiangtong = 1;
 							}else{
@@ -240,113 +256,287 @@
 							}
 						}
 					});
+					this.childrens = container.children;
 					// 同一个终止计划
 					if(isXiangtong){
 						return
 					}
-					if(this.resr[0]){
-						this.resr[1]=index
-						this.startObj[1] =this.dataList[dIndex]
-						this.startObj[1].index = dIndex
+					if(this.containerList[0].id){
+						this.containerList[1] = _self;
+						this.containerList[1].containerIndex=containerIndex
 						this.vreFun()
 					}else{
-						this.resr[0]=index;
-						
-						this.startObj[0] =this.dataList[dIndex]
-						console.log(this.startObj[0])
-						this.startObj[0].index = dIndex
+						this.containerList[0] = _self;
+						this.containerList[0].containerIndex=containerIndex
 					}
-					obj = this.dataList[dIndex]
-					// this.drewBorder({
-					// 	rectX:this.rectLong,
-					// 	rectY:this.rectLong,
-					// 	_sX:parseInt(obj.x)+parseInt(obj.x_w),
-					// 	_sY:parseInt(obj.y)+parseInt(obj.x_h)
-					// })
-					// container.removeChildAt(_self.id,_self.id+1);
-					// stage.update()
-					// console.log('_self---click事件',_self)
 				})
 			},
-			// 验证结果位置关联
-			verAddressFun(index_0,index_1){
-				// 合并数据 初始数据 create生产的container 子集数据
-				var _this = this;
-				var containerDatas = this.resr;  //id
-				var startDatas =this.startObj
-				console.log(containerDatas)
-				console.log(startDatas)
-				// 同一维度 横向
-				if(startDatas[0].y == startDatas[1].y){
-					// 检查是否紧挨
-					if(Math.abs(startDatas[0].x-startDatas[1].x) == this.rectLong){
-						this.drawLine('straight-line',()=>{
-							setTimeout(res=>{
-								_this.delData(index_0,index_1)
-							},200)
-						})
+			// a
+			interval(coord,into){
+				var _s = this.containerList;
+				var isDel = 0;
+				if(coord == 'x'){
+					// 中间有间隙 判断中间的数据还是否存在
+						var isNum = Math.abs(_s[0].obj.x-_s[1].obj.x)/this.rectLong-1;
+						var mixID = _s[0].obj.x>_s[1].obj.x?_s[1].obj.id:_s[0].obj.id;
+						var containerDatasIndex = '';
+						var exists = [];//存在的数据 位置坐标;
+						this.dataList.forEach((element,i) => {
+							if(element.id == mixID){
+								containerDatasIndex = i
+							}
+						});
+						var notDel = 0;
+						for(let i =0;i<isNum;i++){
+							containerDatasIndex++;
+							if(!this.dataList[containerDatasIndex].isDel){
+								notDel=1
+							}
+						}
+						// 中间有数据 不可直线线连接
+						if(!notDel){
+							console.log('直线删除')
+							isDel = 1;//中间有数据 但已经删除
+						}else{
+							isDel = 0
+						}
+					if( into == 'top'){
+						console.log('into' ,into)
+						if(!isDel){
+							console.log('直接上边删除')
+							// 尝试上边删除删除
+							var upD = [{},{}];
+								upD[0].y =	_s[0].obj.y-this.rectLong
+								upD[0].x =	_s[0].obj.x
+								upD[0].x_w = _s[0].obj.x_w
+								upD[0].x_h = _s[0].obj.x_h
+								upD[1].y =	_s[1].obj.y-this.rectLong
+								upD[1].x =	_s[1].obj.x
+								upD[1].x_w = _s[1].obj.x_w
+								upD[1].x_h = _s[1].obj.x_h
+							this.newUpD = upD; //折点
+							isDel = 1
+						}
+					}else if( into == 'botton'){
+						console.log('into' ,into)
+						console.log('直接下面删除');
+							var upD = [{},{}];
+								upD[0].y =	_s[0].obj.y+this.rectLong
+								upD[0].x =	_s[0].obj.x
+								upD[0].x_w = _s[0].obj.x_w
+								upD[0].x_h = _s[0].obj.x_h
+								upD[1].y =	_s[1].obj.y+this.rectLong
+								upD[1].x =	_s[1].obj.x
+								upD[1].x_w = _s[1].obj.x_w
+								upD[1].x_h = _s[1].obj.x_h
+							this.newUpD = upD; //折点
+							isDel = 1;
 					}else{
-
+						
+						if(!isDel){  
+							console.log('尝试上边删除')
+							// 尝试上边删除删除
+							var upD = [{},{}];
+								upD[0].y =	_s[0].obj.y-this.rectLong
+								upD[0].x =	_s[0].obj.x
+								upD[1].y =	_s[1].obj.y-this.rectLong
+								upD[1].x =	_s[1].obj.x
+							
+							var upDobj = {}
+							if(upD[0].x < upD[1].x){
+								upDobj = upD[0]
+							}else{
+								upDobj = upD[1]
+							}
+							var upDIndex = '';
+							this.dataList.forEach((element,i)=> {
+								if(element.x == upDobj.x&&element.y == upDobj.y){
+									upDIndex = i
+								}
+							}); 
+							console.log('s',upDIndex )
+							this.dataList.forEach((element,i)=> {
+								if(element.x == upD[0].x&&element.y == upD[0].y){
+									upD[0].x_w = element.x_w
+									upD[0].x_h = element.x_h;
+								}
+							}); 
+							this.dataList.forEach((element,i)=> {
+								if(element.x == upD[1].x&&element.y == upD[1].y){
+									upD[1].x_w = element.x_w
+									upD[1].x_h = element.x_h;
+								}
+							});
+							console.log('***************',upD)
+							this.newUpD = upD; //折点
+							var n_isNum = isNum + 2;
+							var n_notDel = 0;
+							for(let i =0;i<n_isNum;i++){
+								console.log('---'+i+'--',JSON.stringify(this.dataList[upDIndex]))
+								if(!this.dataList[upDIndex].isDel){
+									n_notDel = 1
+								}
+								upDIndex ++
+							}
+							console.log('n_notDel',n_notDel)
+							if(!n_notDel){
+								console.log('尝试上边删除-success')
+								isDel = 1
+							}else{
+								isDel = 0
+							}
+						}
+						// 尝试下面删除
+						if(!isDel){
+							console.log('尝试下面删除');
+							var upD = [{},{}];
+								upD[0].y =	_s[0].obj.y+this.rectLong
+								upD[0].x =	_s[0].obj.x
+								upD[1].y =	_s[1].obj.y+this.rectLong
+								upD[1].x =	_s[1].obj.x
+							var upDobj = {}
+							if(upD[0].x < upD[1].x){
+								upDobj = upD[0]
+							}else{
+								upDobj = upD[1]
+							}
+							console.log('upDobj',upDobj)
+							var upDIndex = '';
+							this.dataList.forEach((element,i)=> {
+								if(element.x == upDobj.x&&element.y == upDobj.y){
+									upDIndex = i
+								}
+							}); 
+							console.log('upDIndex',upDIndex)
+							this.dataList.forEach((element,i)=> {
+								if(element.x == upD[0].x&&element.y == upD[0].y){
+									upD[0].x_w = element.x_w
+									upD[0].x_h = element.x_h;
+								}
+							}); 
+							this.dataList.forEach((element,i)=> {
+								if(element.x == upD[1].x&&element.y == upD[1].y){
+									upD[1].x_w = element.x_w
+									upD[1].x_h = element.x_h;
+								}
+							});
+							this.newUpD = upD; //折点
+							var n_isNum = isNum + 2;
+							var n_notDel = 0;
+							for(let i =0;i<n_isNum;i++){
+								console.log('---'+i+'--',this.dataList[upDIndex])
+								if(!this.dataList[upDIndex].isDel){
+									n_notDel = 1
+								}
+								upDIndex ++
+							}
+							console.log('n_notDel',n_notDel)
+							if(!n_notDel){
+								console.log('尝试下面删除-success')
+								isDel = 1
+							}else{
+								isDel = 0
+							}
+						}
 					}
 				}
+				if(coord == 'y'){
+					
+				}
 				
+				return isDel;
+			},
+			// 验证结果位置关联
+			verAddressFun(){
+				// 判断是否符合删除条件
+				var isDel = 0;
+				var _s = this.containerList;
+				console.log(_s)
+				// 同一纬度
+				if(_s[0].obj.y == _s[1].obj.y){
+					if(Math.abs(_s[0].obj.x-_s[1].obj.x) == this.rectLong){
+						isDel = 1
+					}else{
+						// 判断是不是在边上
+						console.log('--------------------',_s[0].obj.x,_s[1].obj.x)
+						if(_s[0].obj.y<=this.rectLong+12){
+							isDel = this.interval('x','top');
+							// 上放
+						}else if(_s[0].obj.y>=this.rectLong*4+12){
+							isDel = this.interval('x','botton');
+							// 最下
+						}else{
+							isDel = this.interval('x');
+						}
+					}
+				}
+				// 同意经度
+				if(_s[0].obj.x == _s[1].obj.x){// 同一经度 纵向
+					// 检查是否紧挨
+					if(Math.abs(_s[0].obj.y - _s[1].obj.y) == this.rectLong){
+						isDel = 1
+					}else{
+						
+					}
+				}
+
+				var _this =this
+				if(isDel){
+					this.drawLine('straight-line',()=>{
+						setTimeout(res=>{
+							_this.delData()
+						},1000)
+					})
+				}else{
+					this.notOk()
+				}
 			},
 			// 连线成功删除数据 ，重新初始化
-			delData(index_0,index_1){
+			delData(){
+				var _s = this.containerList;
+				this.dataList.map((item,i)=>{
+					_s.forEach(element => {
+						if(item.id == element.obj.id){
+							item.isDel = 1
+						}
+					});
+				})
+				console.log(_s,this.dataList)
 				// 连线成功删除数据 ，重新初始化
-				container.removeChildAt(index_0,index_1,index_0+1,index_1+1);
+				container.removeChildAt(_s[0].containerIndex,_s[1].containerIndex);
+				container3.removeChildAt(_s[0].containerIndex,_s[1].containerIndex)
 				// 删除联系画布
 				containerLine.removeAllChildren();
 				this.resr=['',''];
+				this.newUpD=[];
 				this.startObj=[{},{}];
+				this.containerList=[{},{}]
 			},
 			// 验证结果
 			vreFun(){
-				var ids = this.resr;
-				var index_0=-1;
-				var index_1=-2;
-				container.children.forEach((element,i) => {
-					if(element.id==ids[0]){
-						index_0 = i;
-					}
-					if(element.id==ids[1]){
-						index_1 = i;
-					}
-				});
-				var text_0=-1,text_1=-2;
-				container.children.forEach((element,i) => {
-					if(i==index_0+1){
-						text_0=element.text
-					}
-					if(i==index_1+1){
-						text_1=element.text
-					}
-				});
-				var _this =this;
-				var resrS = this.resr
-				var startObjS = this.startObj;
-				// 点击两次验证结果，此时不可点
-				verifyResult = 1
-				setTimeout(res=>{
-					if(text_0==text_1){
-						// 执行删除计划
-						_this.verAddressFun(index_0,index_1)
+				var _s = this.containerList;
+				if(_s[0].obj.type == _s[1].obj.type){
+					if(this.CONTENT){
+						this.delData()
 					}else{
-						var newRS =['',''],sRS=[{},{}]
-						newRS[0] = resrS[1]
-						sRS[0] = startObjS[1]
-						container.children.forEach((element,i) => {
-							if(element.id==resrS[0]){
-								element.shadow.blur =0
-							}
-						})
-						_this.resr =newRS;
-						_this.startObj = sRS
+						this.verAddressFun()
 					}
-					verifyResult = 0
-				},100)
-				
-
+				}else{
+					this.notOk()
+				}
+			},
+			// 不符合删除条件
+			notOk(){
+				this.newUpD=[]
+				var _s = this.containerList;
+				var sRS=[{},{}];
+				sRS[0] = _s[1]
+				container.children.forEach((element,i) => {
+					if(element.id==_s[0].id){
+						element.shadow.blur =0
+					}
+				})
+				this.containerList = sRS;
 			}
 		},
 
@@ -358,9 +548,10 @@
 				//创建一个形状的显示对象
 				container = new createjs.Container();
 				container2 = new createjs.Container();
+				container3 = new createjs.Container();
 				containerBg = new createjs.Container();
 				containerLine = new createjs.Container();
-				stage.addChild(containerBg,container,container2,containerLine)
+				stage.addChild(containerBg,container,container2,container3,containerLine)
 				//更新阶段将呈现下一帧
 				createjs.Ticker.setFPS(60);
 				createjs.Ticker.addEventListener("tick", handleTick);
@@ -384,8 +575,15 @@
 }
 #index{
 	.start{
-		position: fixed;top: 100px;left: 50%;
+		position: fixed;top: 700px;left: 50%;
 		transform: translateX(-50%);
+		display: flex;justify-content: center;align-items: center;
+		>div{
+			font-size: 30px;color: #fff;font-weight: bold;
+			padding: 10px 40px;
+			background: red;
+			border-radius: 20px;
+		}
 	}
 }
 </style>
