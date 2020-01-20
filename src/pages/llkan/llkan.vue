@@ -4,7 +4,7 @@
 		<canvas id='demoCanvas' width="750" height="1450"></canvas>
 		<div class="start" >
 			<div @click="startBtn">开始</div>
-			<div @click="contentBtn">CONTENT+{{CONTENT}}</div>
+			<div @click="contentBtn">{{CONTENT?'只验证文字相同':'全部验证'}}</div>
 		</div>
 
 	</div>
@@ -28,13 +28,14 @@
 				pageShow: 'index',
 				twoDimension:[],
 				twoTextData:[],
-				CONTENT:'直接消除',
+				CONTENT:false,
 				twoDimensionLength:8,
 				configDataL:{
 					shape:{
 						w:40,
 						h:40
 					},
+					interval:10,
 					result:[]
 				}
 			}
@@ -44,28 +45,29 @@
 		watch: {},
 		methods: {
 			contentBtn(){
-				this.CONTENT=!this.CONTENT
+				this.CONTENT=!this.CONTENT;
 			},
 			startBtn(){},
-			contentBtn(){},
 			// 绘制元素
-			drew(ele,y) {
+			drew(ele,j) {
 				var rectX =this.rectLong,rectY =this.rectLong;//矩形大小
-				var x = ele.x*this.configDataL.shape.w + ele.x*10,
-					y = ele.y*this.configDataL.shape.h + y*10;//坐标
+				var x = ele.x*this.configDataL.shape.w + ele.x*this.configDataL.interval,
+					y = ele.y*this.configDataL.shape.h + j*this.configDataL.interval;//坐标
 
 				var rect = new createjs.Shape();
-				var color = '#b8ccf3'
+				var color = '#b8ccf3';
+				var color2 ='#fff'
 				if(ele.start){
-					color ='#e5d6af' 
+					color ='#e5d6af'
+					color2 = 'blue' 
 				}  
 				rect.graphics.beginFill(color).drawRect(x, y, this.configDataL.shape.w, this.configDataL.shape.h);
 				rect.shadow = new createjs.Shadow("red", 0, 0, 0);
 				rect.obj = ele
-				var text = new createjs.Text(ele.txt,"12px Arial","blue");
+				var text = new createjs.Text(ele.txt||j,"12px Arial",color2);
 				text.x = x + this.configDataL.shape.w/3
 				text.y = y + this.configDataL.shape.h/3
-
+				text.obj = ele
 				if(ele.start){
 					rect.visible=1
 					text.visible=1
@@ -82,7 +84,7 @@
 				container3.addChild(text)
 				stage.update();
 			},
-
+			// 创建数据
 			createArrs(){
 				var arrs=[];
 				for(var i=0;i<this.twoDimensionLength;i++){
@@ -108,14 +110,16 @@
 				this.twoDimension = arrs;
 				this.createPrate()
 			},
+			// 绘制图形
 			createPrate(){
 				var index=0;
 				this.twoDimension.forEach((item,i) => {
 					item.forEach((obj,j)=>{
-						console.log('--------------',obj)
 						if(obj.start){
 							obj.txt = this.twoTextData[index].type;
 							index++;
+						}else{
+							obj.txt = i;
 						}
 						this.drew(obj,j)
 					})
@@ -151,35 +155,116 @@
 			verifyResultFunc(){
 				var startObj = this.configDataL.result[0].obj;
 				var endObj = this.configDataL.result[1].obj;
-				console.log(startObj,endObj)
+				var _this =this;
 				if(startObj.txt == endObj.txt){
-					var zb = verify.line(this.twoDimension,startObj,endObj);
-					var isTrue = 0
-					zb.forEach(e => {
-						if(this.verifyTowStart(e.x,e.y)){
-							isTrue = 1;
-						}
-					});
-					if(isTrue){
-						this.notOk()
+					// true 可删除  false 不可删除
+					var verifyGetstartObj = verify.getstart(this.twoDimension,startObj,endObj,this.twoDimensionLength);
+					if(verifyGetstartObj.isTrue){
+						this.drawLine(verifyGetstartObj,()=>{
+							setTimeout(()=>{
+								_this.delData(verifyGetstartObj)
+							},1000)
+						})
+					}else if(this.CONTENT){
+						this.drawLine(verifyGetstartObj,()=>{
+							setTimeout(()=>{
+								_this.delData(verifyGetstartObj)
+							},1000)
+						})
 					}else{
-						console.log('meiyou')
+						this.notOk()
 					}
 				}else{
 					this.notOk()
 				}
 			},
-			verifyTowStart(x,y,start=0){
+			drawLine(verifyGetstartObj,cd){
+				var _s = verifyGetstartObj;
+				var w = this.configDataL.shape.w
+				var h = this.configDataL.shape.h
+				var interval = this.configDataL.interval
+
+				var f_sX = _s.startObj.x*( w + interval )+w/2,
+					f_sY = _s.startObj.y*( h + interval )+h/2;//坐标
+
+				var e_sX = _s.endObj.x*( w + interval )+w/2,
+					e_sY = _s.endObj.y*( h + interval )+h/2//坐标
 				
-				this.twoDimension.forEach((item,i) => {
-					item.forEach((obj,j)=>{
-						if(obj.x == x &&obj.y==y){
-							start = obj.start
-						}
-					})
-				});
-				return start;
+				let g = new createjs.Graphics();
+				/* 同一个 Graphics 实例， 可以多次绘制，以下线段、折线都是用 g 实例绘制的*/
+				if(_s.breaks.length==1){
+					var x = _s.breaks[0].x*( w + interval )+w/2;
+					var y = _s.breaks[0].y*( h + interval )+h/2;
+					g.setStrokeStyle(2).beginStroke("#000").moveTo(f_sX,f_sY).lineTo(x,y).lineTo(e_sX,e_sY)
+				}else if(_s.breaks.length == 2){
+					var x = _s.breaks[0].x*( w + interval )+w/2;
+					var y = _s.breaks[0].y*( h + interval )+h/2;
+					
+					var x2 = _s.breaks[1].x*( w + interval )+w/2;
+					var y2 = _s.breaks[1].y*( h + interval )+h/2;
+					if()
+					console.log('tow 折点',[_s.startObj.x,_s.startObj.y],_s.breaks,[_s.endObj.x,_s.endObj.y])
+					g.setStrokeStyle(2).beginStroke("#000").moveTo(f_sX,f_sY).lineTo(x2,y2).lineTo(x,y).lineTo(e_sX,e_sY)
+				}else{
+					g.setStrokeStyle(2).beginStroke("#000").moveTo(f_sX,f_sY).lineTo(e_sX,e_sY)
+				}
+				// 简写形式
+				// g.ss(20).s('#fafa35').mt(400,100).lt(400,260)
+				// // 多点折线的简写形式
+
+				// g.ss(1).s('#000').mt(600,400).lt(600, 200).lt(400,300).lt(500, 550)
+				var line = new createjs.Shape(g);
+				containerLine.addChild(line);
+				stage.update()
+				cd&&cd()
 			},
+			// 删除数据
+			delData(verifyGetstartObj){
+				var _s = verifyGetstartObj;
+				var index = -1;
+				container.children.forEach(e => {
+					if(e.obj.x==_s.startObj.x&&e.obj.y==_s.startObj.y){
+						e.alpha = 0
+					}if(e.obj.x==_s.endObj.x&&e.obj.y==_s.endObj.y){
+						e.alpha = 0
+					}
+				});
+				container3.children.forEach(e => {
+					if(e.obj.x==_s.startObj.x&&e.obj.y==_s.startObj.y){
+						e.alpha = 0
+					}if(e.obj.x==_s.endObj.x&&e.obj.y==_s.endObj.y){
+						e.alpha = 0
+					}
+				});
+				this.twoTextData.map(e=>{
+					if(e.x==_s.startObj.x&&e.y==_s.startObj.y){
+						e.start = 0
+					}if(e.x==_s.endObj.x&&e.y==_s.endObj.y){
+						e.start = 0
+					}
+				})
+				this.twoDimension.map(item=>{
+					item.forEach(e => {
+						if(e.x==_s.startObj.x&&e.y==_s.startObj.y){
+							e.start = 0
+						}if(e.x==_s.endObj.x&&e.y==_s.endObj.y){
+							e.start = 0
+						}
+					});
+				})
+				containerLine.removeAllChildren();
+				this.configDataL.result = [];
+			},
+			// verifyTowStart(x,y,start=0){
+			// 	this.twoDimension.forEach((item,i) => {
+			// 		item.forEach((obj,j)=>{
+			// 			if(obj.x == x &&obj.y==y){
+			// 				start = obj.start
+			// 			}
+			// 		})
+			// 	});
+			// 	return start;
+			// },
 			// 不符合删除条件
 			notOk(){
 				var _s = this.configDataL.result;
@@ -250,7 +335,7 @@
 				stage.x=80
 				stage.y=80
 				//更新阶段将呈现下一帧
-				createjs.Ticker.setFPS(60);
+				createjs.Ticker.setFPS(30);
 				createjs.Ticker.addEventListener("tick", handleTick);
 				// bgF()
 				// bitImg()
