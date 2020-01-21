@@ -124,13 +124,15 @@ function resetSystemFunc(startObj,endObj,system='x'){
  * @param {当前坐标状态} start 
  */
 function verifyTowStart(twoDimension,x,y,start=0){
-    console.log(x,y)
     return twoDimension[x][y].start;
 }
 /***
  * 返回true 路线成功 
  */
-function verifyLuxianIsOk(twoDimension,startObj,one,tow,endObj){
+function verifyLuxianIsOk(hint,twoDimension,startObj,one,tow,endObj){
+    if(hint=='上'||hint=='下'){
+        console.log(hint,startObj,one,tow,endObj)
+    }
     var zbs=[]
     var isTrue=0
     line(twoDimension,startObj,one).forEach(element => {
@@ -157,8 +159,8 @@ function verifyLuxianIsOk(twoDimension,startObj,one,tow,endObj){
 function towBrack(twoDimension,startObj,endObj){
     var getTowBreaks = getTowBreakFunc(startObj,endObj);
     var isTrue = 1;
-    var breaks=[]
-    console.log('getTowBreaks',getTowBreaks)
+    var breaks=[];
+    var fangxian = ''
     // 初始点 startObj,endObj
     // 花园折点 getTowBreaks[0] getTowBreaks[1]
     var newOneBreaksObj = getTowBreaks[0];
@@ -167,6 +169,7 @@ function towBrack(twoDimension,startObj,endObj){
     // 上
     if(isTrue){
         var one_y = newOneBreaksObj.y;
+        console.log('newOneBreaksObj.y',newOneBreaksObj)
         for(let i=0;i<newOneBreaksObj.y;i++){
             one_y--
             if(one_y<0) break;
@@ -178,19 +181,25 @@ function towBrack(twoDimension,startObj,endObj){
                 x:newTowBreaksObj.x,
                 y:one.y
             }
-            if(verifyLuxianIsOk(twoDimension,startObj,one,tow,endObj)){
+            var result=''
+            if(startObj.x == one.x){
+                result = verifyLuxianIsOk('上',twoDimension,startObj,one,tow,endObj)
+            }else{
+                result = verifyLuxianIsOk('上',twoDimension,startObj,tow,one,endObj)
+            }
+            if(result){
                 isTrue=0
-                console.log('shang--循环次数==',one,tow)
+                fangxian = '上'
                 breaks.push(one,tow)
                 break
             }
-            console.log('往上--循环次数==',i)
         }
     }
     // 下
     if(isTrue){
         var one_y = newOneBreaksObj.y;
-        for(let i=0;i<newOneBreaksObj.y;i++){
+        console.log('newOneBreaksObj.y',twoDimensionLength,newOneBreaksObj)
+        for(let i=0;i<twoDimensionLength-newOneBreaksObj.y;i++){
             one_y++
             if(one_y>=twoDimensionLength) break;
             var one = {
@@ -201,13 +210,18 @@ function towBrack(twoDimension,startObj,endObj){
                 x:newTowBreaksObj.x,
                 y:one.y
             }
-            if(verifyLuxianIsOk(twoDimension,startObj,one,tow,endObj)){
+            var result = ''
+            if(startObj.x == one.x){
+                result = verifyLuxianIsOk('下',twoDimension,startObj,one,tow,endObj)
+            }else{
+                result = verifyLuxianIsOk('下',twoDimension,startObj,tow,one,endObj)
+            }
+            if(result){
                 isTrue=0
-                console.log('xia--循环次数==',one,tow)
+                fangxian = '下'
                 breaks.push(one,tow)
                 break
             }
-            console.log('下--循环次数==',i)
         }
     }
     
@@ -226,9 +240,15 @@ function towBrack(twoDimension,startObj,endObj){
                 x:one.x,
                 y:newTowBreaksObj.y
             }
-            if(verifyLuxianIsOk(twoDimension,startObj,one,tow,endObj)){
+            var result = ''
+            if(startObj.y == one.y){
+                result = verifyLuxianIsOk('右',twoDimension,startObj,one,tow,endObj)
+            }else{
+                result = verifyLuxianIsOk('右',twoDimension,startObj,tow,one,endObj)
+            }
+            if(result){
                 isTrue=0
-                console.log('you--循环次数==',one,tow)
+                fangxian = '右'
                 breaks.push(one,tow)
                 break
             }
@@ -249,18 +269,24 @@ function towBrack(twoDimension,startObj,endObj){
                 x:one.x,
                 y:newTowBreaksObj.y
             }
-            if(verifyLuxianIsOk(twoDimension,startObj,one,tow,endObj)){
+            var result = ''
+            if(startObj.y == one.y){
+                result = verifyLuxianIsOk('左',twoDimension,startObj,one,tow,endObj)
+            }else{
+                result = verifyLuxianIsOk('左',twoDimension,startObj,tow,one,endObj)
+            }
+            if(result){
                 isTrue=0
-                console.log('zuo--循环次数==',one,tow)
+                fangxian = '左'
                 breaks.push(one,tow)
                 break
             }
-            console.log('左--循环次数==',i)
         }
     }
     // 第一次尝试一个 折点 绘制 
     return {
         breaks:breaks,
+        fangxian:fangxian,
         isTrue:isTrue
     }
 }
@@ -290,7 +316,6 @@ function oneBrack(twoDimension,startObj,endObj){
         }
     });
     if(!isTrue){
-        console.log('第一次尝试一个折点--success')
         breaks=[one]
     }else{
         var isTrue = 0;
@@ -311,7 +336,6 @@ function oneBrack(twoDimension,startObj,endObj){
             }
         });
         if(!isTrue){
-            console.log('第二次尝试一个折点-success')
             breaks=[tow]
         }
     }
@@ -328,6 +352,9 @@ function oneBrack(twoDimension,startObj,endObj){
  * twoDimensionLength总长度
  */
 var twoDimensionLength =8;
+function setLenght(length){
+    twoDimensionLength = length
+}
 function getstart(twoDimension,startObj,endObj){
     var isTrue = 0;  //0 可以绘制  1存在 不可以绘制
     // 判断是否是直线
@@ -338,7 +365,6 @@ function getstart(twoDimension,startObj,endObj){
                 isTrue = 1;
             }
         });
-        console.log('直线',zbs)
         if(isTrue){
             var oneBrackobj = oneBrack(twoDimension,startObj,endObj)
             if(oneBrackobj.isTrue){
@@ -358,6 +384,7 @@ function getstart(twoDimension,startObj,endObj){
         startObj:startObj,
         endObj:endObj,
         breaks:oneBrackobj?oneBrackobj.breaks:[],
+        fangxian:oneBrackobj?oneBrackobj.fangxian:'',
         isTrue:isTrue?false:true
     }
 }
@@ -365,5 +392,6 @@ function getstart(twoDimension,startObj,endObj){
 export default{
     line:line,
     getstart:getstart,
+    setLenght:setLenght,
     verifyTowStart:verifyTowStart
 }

@@ -147,8 +147,8 @@ var loadScene = function(scene) {
 function getScenePromise(scene, preloadNum, link) {
   let promise;
   if (!loadPromiseObj[scene]) {
-    promise = new Loader(scene, preloadNum, link).init();
-    loadPromiseObj[scene] = promise;
+    // promise = new Loader(scene, preloadNum, link).init();
+    // loadPromiseObj[scene] = promise;
   } else {
     promise = loadPromiseObj[scene];
   }

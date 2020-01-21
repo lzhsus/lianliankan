@@ -59,7 +59,7 @@ webpackDevMiddlewareInstance.waitUntilValid(() => {
   console.log('Package is in a valid state');
 });
 
-app.listen(8081, function (res) {
+app.listen(8081,'192.168.0.112', function (res) {
   console.log('Serve the files on port 8081.\n');
 });
 
