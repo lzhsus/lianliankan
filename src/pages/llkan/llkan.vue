@@ -24,6 +24,7 @@
 	import dC from "../../flash/dataconfig.js"
 	import verify from "../../flash/verify.js"
 	import canvasAutoRotation from "vendor/createjs/canvas_auto_rotation";
+
 	var stage,container,circle,y_num=0,container2,container3,containerBg,containerLine,interval=10;
 	// var numL=4,rectLongJS=30;
 	export default {
@@ -318,7 +319,7 @@
 				if(_s.breaks.length==1){
 					var x = _s.breaks[0].x*( w + interval )+w/2;
 					var y = _s.breaks[0].y*( h + interval )+h/2;
-					g.setStrokeStyle(2).beginStroke("#000").moveTo(f_sX,f_sY).lineTo(x,y).lineTo(e_sX,e_sY)
+					g.setStrokeStyle(6).beginStroke("#00B9ED").moveTo(f_sX,f_sY).lineTo(x,y).lineTo(e_sX,e_sY)
 				}else if(_s.breaks.length == 2){
 					var x = _s.breaks[0].x*( w + interval )+w/2;
 					var y = _s.breaks[0].y*( h + interval )+h/2;
@@ -328,23 +329,26 @@
 					// if()
 					if(_s.fangxian == '上'||_s.fangxian == '下'){
 						if(_s.startObj.y != _s.breaks[0].y){
-							g.setStrokeStyle(2).beginStroke("#000").moveTo(f_sX,f_sY).lineTo(x,y).lineTo(x2,y2).lineTo(e_sX,e_sY)
+							g.setStrokeStyle(6).beginStroke("#00B9ED").moveTo(f_sX,f_sY).lineTo(x,y).lineTo(x2,y2).lineTo(e_sX,e_sY)
 						}else{
-							g.setStrokeStyle(2).beginStroke("#000").moveTo(f_sX,f_sY).lineTo(x2,y2).lineTo(x,y).lineTo(e_sX,e_sY)
+							g.setStrokeStyle(6).beginStroke("#00B9ED").moveTo(f_sX,f_sY).lineTo(x2,y2).lineTo(x,y).lineTo(e_sX,e_sY)
 						}
 					}else if(_s.fangxian == '左'||_s.fangxian == '右'){
 						if(_s.startObj.y == _s.breaks[0].y){
-							g.setStrokeStyle(2).beginStroke("#000").moveTo(f_sX,f_sY).lineTo(x,y).lineTo(x2,y2).lineTo(e_sX,e_sY)
+							g.setStrokeStyle(6).beginStroke("#00B9ED").moveTo(f_sX,f_sY).lineTo(x,y).lineTo(x2,y2).lineTo(e_sX,e_sY)
 						}else{
-							g.setStrokeStyle(2).beginStroke("#000").moveTo(f_sX,f_sY).lineTo(x2,y2).lineTo(x,y).lineTo(e_sX,e_sY)
+							g.setStrokeStyle(6).beginStroke("#00B9ED").moveTo(f_sX,f_sY).lineTo(x2,y2).lineTo(x,y).lineTo(e_sX,e_sY)
 						}
 					}else{
-						g.setStrokeStyle(2).beginStroke("#000").moveTo(f_sX,f_sY).lineTo(x2,y2).lineTo(x,y).lineTo(e_sX,e_sY)
+						g.setStrokeStyle(6).beginStroke("#00B9ED").moveTo(f_sX,f_sY).lineTo(x2,y2).lineTo(x,y).lineTo(e_sX,e_sY)
 					}
 					console.log('tow 折点',[_s.startObj.x,_s.startObj.y],_s.breaks,[_s.endObj.x,_s.endObj.y])
 				}else{
-					g.setStrokeStyle(2).beginStroke("#000").moveTo(f_sX,f_sY).lineTo(e_sX,e_sY)
+					g.setStrokeStyle(6).beginStroke("#00B9ED").moveTo(f_sX,f_sY).lineTo(e_sX,e_sY)
 				}
+				
+				this.circleFunc(f_sX,f_sY)
+				this.circleFunc(e_sX,e_sY)
 				// 简写形式
 				// g.ss(20).s('#fafa35').mt(400,100).lt(400,260)
 				// // 多点折线的简写形式
@@ -356,7 +360,20 @@
 				cd&&cd()
 			},
 			// 删除数据
-			delData(verifyGetstartObj){
+			promiseFunc(){
+				return new Promise((resolve, reject)=>{
+					setTimeout(res=>{
+						if(true){
+							resolve('success')
+						}else{	
+							reject('错误')
+						}
+					},2000)
+				})
+			},
+			async delData(verifyGetstartObj){
+				var time = await this.promiseFunc()
+				console.log('结束')
 				var _s = verifyGetstartObj;
 				var index = -1;
 				container.children.forEach(e => {
@@ -390,6 +407,7 @@
 					});
 				})
 				containerLine.removeAllChildren();
+				stage.update()
 				this.verifyResult=false
 				this.configDataL.result = [];
 				if(this.isSuccessOk()){
@@ -497,6 +515,13 @@
 				//返回最后得出的数组
 				return tempArray3
 				// return targetArray
+			},
+			// 绘制圆圈
+			circleFunc(x,y,r=10){
+				let gC = new createjs.Shape();
+					gC.graphics.beginFill("#00B9ED").drawCircle(x,y, r);
+				containerLine.addChild(gC);
+				stage.update()
 			},
 			// 
 			clearCreate(){
