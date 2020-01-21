@@ -194,7 +194,6 @@
 				}
 				
 				
-				 
 				this.contentAdd(rect)
 				container.addChild(rect);
 				
@@ -372,7 +371,7 @@
 				})
 			},
 			async delData(verifyGetstartObj){
-				var time = await this.promiseFunc()
+				// var time = await this.promiseFunc()
 				console.log('结束')
 				var _s = verifyGetstartObj;
 				var index = -1;
@@ -482,7 +481,6 @@
 						if(element.type ==obj.type){
 							// _num++
 							_value++
-							console.log('_value',_value,_num,this.configDataL.MaxRepetition)
 							if(_value==this.configDataL.MaxRepetition){
 								_num++
 								_value=0
