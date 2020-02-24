@@ -199,7 +199,8 @@ function towBrack(twoDimension,startObj,endObj){
     if(isTrue){
         var one_y = newOneBreaksObj.y;
         console.log('newOneBreaksObj.y',twoDimensionLength,newOneBreaksObj)
-        for(let i=0;i<twoDimensionLength-newOneBreaksObj.y;i++){
+        for(let i=0;i<
+            +-newOneBreaksObj.y;i++){
             one_y++
             if(one_y>=twoDimensionLength) break;
             var one = {

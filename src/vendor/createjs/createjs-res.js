@@ -23,10 +23,12 @@ function Loader(cls, loaderNum, link = false) {
   };
   this.init = function() {
     dtd = $.Deferred();
+    console.log('canvasCls',canvasCls)
     canvas = require("static/flash/" + canvasCls + ".js");
     if (!link) {
       lib = require("src/flash/" + canvasCls + ".js");
     }
+    console.log
     lib["name"] = canvasCls;
     lib.getDisplay = getDisplay;
     canvas(lib, images, createjs, ss, AdobeAn);
@@ -147,8 +149,8 @@ var loadScene = function(scene) {
 function getScenePromise(scene, preloadNum, link) {
   let promise;
   if (!loadPromiseObj[scene]) {
-    // promise = new Loader(scene, preloadNum, link).init();
-    // loadPromiseObj[scene] = promise;
+    promise = new Loader(scene, preloadNum, link).init();
+    loadPromiseObj[scene] = promise;
   } else {
     promise = loadPromiseObj[scene];
   }
@@ -208,8 +210,6 @@ function Flash(canvas) {
       return opt["middleLayer"][value];
     });
     firstPreloadScenes=firstPreloadScenes.concat([opt["bottomLayer"], opt["topLayer"]]);
-    console.log(firstPreloadScenes);
-
     return loadScene(opt["loading"])
       .then(function(loading) {
         loadedPage["loading"] = loading.getDisplay();
@@ -249,9 +249,11 @@ function Flash(canvas) {
     });
   }
   this.goto = function(page, transition, progressCb, completeCb) {
+    console.log('page',page,curPage)
     if (page == curPage) {
       return loadPromiseObj[curPage];
     }
+    console.log('1111')
     var tempPage = curPage;
     curPage = page;
 

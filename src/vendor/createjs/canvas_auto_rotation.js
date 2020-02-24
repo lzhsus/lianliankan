@@ -38,14 +38,14 @@ function canvasResize(canvas,w,h,cb){
       var scaleW= w / designH * dpr;
       var scaleH=h / designW * dpr;
       scale=scaleH;
-
-    //   rootMC.scaleX=rootMC.scaleY=scale;
-    //   rootMC.rotation=-90;
-    //   rootMC.x=0;
-    //   rootMC.y=designW*scale;
+      
+      rootMC.scaleX=rootMC.scaleY=scale;
+      rootMC.rotation=-90;
+      rootMC.x=0;
+      rootMC.y=designW*scale;
       stageW=canvasH/scale;
       stageH=canvasW/scale;
-
+      
     }else{
       var scaleW= w / designW * dpr;
       var scaleH=h / designH * dpr;
@@ -62,14 +62,14 @@ function canvasResize(canvas,w,h,cb){
       var scaleW= w / designW * dpr;
       var scaleH=h / designH * dpr;
       scale=scaleW;
-
+      
       rootMC.scaleX=rootMC.scaleY=scale;
       rootMC.rotation=90;
       rootMC.x=designW*scale;
       rootMC.y=0;
       stageW=canvasH/scale;
       stageH=canvasW/scale;
-
+      
     }else{
       var scaleW= w / designH * dpr;
       var scaleH=h / designW * dpr;
@@ -80,7 +80,7 @@ function canvasResize(canvas,w,h,cb){
       rootMC.y=0;
       stageW=canvasW/scale;
       stageH=canvasH/scale;
-
+      
     }
   }
   // displayResize(stageW,stageH);

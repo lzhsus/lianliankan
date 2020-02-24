@@ -181,23 +181,37 @@
 				rect.graphics.beginFill(color).drawRect(x, y, this.configDataL.shape.w, this.configDataL.shape.h);
 				rect.shadow = new createjs.Shadow("red", 0, 0, 0);
 				rect.obj = ele
-				var text = new createjs.Text(ele.txt||j,"30px Arial",color2);
-				text.x = x + this.configDataL.shape.w/3
-				text.y = y + this.configDataL.shape.h/3
-				text.obj = ele
-				if(ele.start){
-					rect.visible=1
-					text.visible=1
-				}else{
-					rect.visible=0
-					text.visible=0
-				}
-				
-				
+
 				this.contentAdd(rect)
 				container.addChild(rect);
 				
-				container3.addChild(text)
+				// 苹果
+				if(ele.txt==1){
+					var bitmap = new createjs.Bitmap("../../static/flash/qrimg.png");
+					if(ele.start){
+						rect.visible=1
+						bitmap.visible=1
+					}else{
+						rect.visible=0
+						bitmap.visible=0
+					}
+					
+					container3.addChild(bitmap)
+				}else{
+					var text = new createjs.Text(ele.txt||j,"30px Arial",color2);
+					text.x = x + this.configDataL.shape.w/3
+					text.y = y + this.configDataL.shape.h/3
+					text.obj = ele
+
+					if(ele.start){
+						rect.visible=1
+						text.visible=1
+					}else{
+						rect.visible=0
+						text.visible=0
+					}
+					container3.addChild(text)
+				}
 				stage.update();
 			},
 			// 创建数据
